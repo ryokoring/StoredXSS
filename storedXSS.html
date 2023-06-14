@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>StoredXSS</title>
+</head>
+<body>
+    <h3>Stored掲示板</h3>
+    <section>
+        <form>
+          <textarea id="body" name="story"
+          rows="5" cols="33">
+          </textarea><br>
+          <input type="submit" onclick="buttonClick()">
+        </form>
+    </section>
+    <div id="result"></div>
+
+    <script>
+      
+      const buttonClick = () => {
+        event.preventDefault();
+        const id = document.getElementById("body");
+        const data = { comment: id.value };
+        id.value = "";
+        fetch('http://10.1.188.1:5000', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        })
+          .then(response => response.json())
+          .then(data => {
+            AwaitGet();
+            
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
+
+          
+           
+      }
+      const AwaitGet = async() => {
+        const body=await fetch('http://10.1.188.1:5000', {
+          method: 'GET',
+        })
+          .then(response => response.text())
+          .then(body => {
+            const resultDiv = document.getElementById("result");
+            resultDiv.innerHTML = `<div>${body}</div>`;
+          });
+          
+    }
+    </script>
+    
+</body>
+</html>
