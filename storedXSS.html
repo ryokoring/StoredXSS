@@ -9,10 +9,13 @@
     <h3>Stored掲示板</h3>
     <section>
         <form>
-          <textarea id="body" name="story"
-          rows="5" cols="33">
-          </textarea><br>
-          <input type="submit" onclick="buttonClick()">
+           
+            <div>
+                本文: <textarea id="body" name="story" rows="5" cols="33"></textarea>
+            </div>
+            <div>
+                <button type="submit" onclick="buttonClick()">投稿</button>
+            </div>
         </form>
     </section>
     <div id="result"></div>
@@ -33,27 +36,47 @@
         })
           .then(response => response.json())
           .then(data => {
-            AwaitGet();
-            
+            AwaitGet(); // ボタンが押された後に再度データを取得し、表示を更新する
           })
           .catch(error => {
             console.error('Error:', error);
           });
-
-          
-           
       }
-      const AwaitGet = async() => {
-        const body=await fetch('http://10.1.188.1:5000', {
+      
+      const AwaitGet = async () => {
+        const response = await fetch('http://10.1.188.1:5000', {
           method: 'GET',
         })
-          .then(response => response.text())
+          .then(response => response.json())
           .then(body => {
             const resultDiv = document.getElementById("result");
-            resultDiv.innerHTML = `<div>${body}</div>`;
+            
+            // 既存の結果をクリア
+            resultDiv.innerHTML = "";
+
+            // 各コメントの時刻と本文を表示
+            body.forEach(obj => {
+              const createdAt = formatDate(obj.createdAt);
+              const body = obj.body;
+              const commentDiv = document.createElement("div");
+              commentDiv.innerHTML = `<div>${createdAt}</div><div>${body}</div>`;
+              resultDiv.appendChild(commentDiv);
+            });
           });
-          
-    }
+      }
+
+      const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        const formattedDate = `${date.getFullYear()}-${padZero(date.getMonth() + 1)}-${padZero(date.getDate())} ${padZero(date.getHours())}:${padZero(date.getMinutes())}:${padZero(date.getSeconds())}`;
+        return formattedDate;
+      }
+
+      const padZero = (value) => {
+        return String(value).padStart(2, '0');
+      }
+
+      // ページの読み込み時とボタンクリック時にAwaitGetを呼び出す
+      
     </script>
     
 </body>
